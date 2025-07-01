@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AyLoad - Download Videos Easily</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#57b5e7", secondary: "#f0f4f8" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+      body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      }
+      .input-url {
+      border: 1px solid #e2e8f0;
+      background-color: white;
+      transition: all 0.3s ease;
+      }
+      .input-url:focus {
+      border-color: #57b5e7;
+      box-shadow: 0 0 0 3px rgba(87, 181, 231, 0.2);
+      }
+      .format-option {
+      transition: all 0.2s ease;
+      }
+      .format-option:hover {
+      transform: translateY(-2px);
+      }
+      .meteor-button {
+      position: relative;
+      overflow: hidden;
+      }
+      .meteor-button::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+      opacity: 0;
+      transform: scale(0);
+      transition: transform 0.5s, opacity 0.5s;
+      }
+      .meteor-button:hover::after {
+      opacity: 0.3;
+      transform: scale(1);
+      }
+      .custom-switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+      }
+      .custom-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      }
+      .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #e2e8f0;
+      transition: .4s;
+      border-radius: 24px;
+      }
+      .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+      }
+      input:checked + .switch-slider {
+      background-color: #57b5e7;
+      }
+      input:checked + .switch-slider:before {
+      transform: translateX(24px);
+      }
+      .custom-radio {
+      display: flex;
+      align-items: center;
+      }
+      .custom-radio input[type="radio"] {
+      display: none;
+      }
+      .radio-label {
+      position: relative;
+      padding-left: 28px;
+      cursor: pointer;
+      }
+      .radio-label:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      border: 2px solid #e2e8f0;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      }
+      .custom-radio input[type="radio"]:checked + .radio-label:before {
+      border-color: #57b5e7;
+      }
+      .radio-label:after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 50%;
+      transform: translateY(-50%) scale(0);
+      width: 8px;
+      height: 8px;
+      background-color: #57b5e7;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      }
+      .custom-radio input[type="radio"]:checked + .radio-label:after {
+      transform: translateY(-50%) scale(1);
+      }
+      .progress-bar {
+      height: 6px;
+      background-color: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+      }
+      .progress-fill {
+      height: 100%;
+      background-color: #57b5e7;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+      }
+      .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      background-color: white;
+      border-left: 4px solid #57b5e7;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      }
+      .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="bg-white/90 backdrop-blur-sm shadow-sm sticky top-0 z-10">
+      <div
+        class="container mx-auto px-4 py-3 flex items-center justify-between"
+      >
+        <a href="#" class="text-2xl text-primary flex items-center gap-2">
+          <img
+            src="https://static.readdy.ai/image/8d12cae1457c5baac07b525f3594878b/bea72a79266dd1151effb5086db8bc07.jfif"
+            alt="Logo"
+            class="w-10 h-10 object-contain"
+          />
+          AyLoad
+        </a>
+        <nav class="hidden md:flex items-center space-x-8">
+          <a href="#" class="text-gray-700 hover:text-primary transition-colors"
+            >Home</a
+          >
+          <a href="#" class="text-gray-700 hover:text-primary transition-colors"
+            >Features</a
+          >
+          <a href="#" class="text-gray-700 hover:text-primary transition-colors"
+            >How It Works</a
+          >
+          <a href="#" class="text-gray-700 hover:text-primary transition-colors"
+            >FAQ</a
+          >
+        </nav>
+        <div class="flex items-center gap-4">
+          <button
+            class="px-4 py-2 text-primary border border-primary hover:bg-primary/5 transition-colors !rounded-button whitespace-nowrap"
+          >
+            Log in
+          </button>
+          <button
+            class="px-4 py-2 bg-primary text-white hover:bg-primary/90 transition-colors !rounded-button whitespace-nowrap meteor-button"
+          >
+            Register
+          </button>
+          <button
+            class="md:hidden w-10 h-10 flex items-center justify-center text-gray-700"
+          >
+            <i class="ri-menu-line text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+    <main>
+      <section
+        class="py-16 md:py-24 relative overflow-hidden"
+        style="background-image: url('https://readdy.ai/api/search-image?query=A%20modern%2C%20minimalist%20tech%20background%20with%20soft%20gradients%20of%20icy%20blue%20and%20light%20silver%2C%20creating%20a%20clean%20and%20professional%20atmosphere.%20The%20design%20should%20be%20subtle%20with%20abstract%20geometric%20shapes%20and%20a%20slight%20digital%20pattern%2C%20perfect%20for%20a%20video%20downloading%20platform.%20The%20left%20side%20should%20be%20lighter%20for%20text%20placement%2C%20while%20the%20right%20side%20can%20have%20more%20visual%20elements.&width=1920&height=800&seq=1&orientation=landscape'); background-size: cover; background-position: center;"
+      >
+        <div class="absolute inset-0 bg-white/70 backdrop-blur-sm"></div>
+        <div class="container mx-auto px-4 relative">
+          <div class="flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-10 md:mb-0">
+              <h1 class="text-4xl md:text-5xl font-bold mb-6 text-gray-800">
+                Download Videos <span class="text-primary">Effortlessly</span>
+              </h1>
+              <p class="text-lg text-gray-600 mb-8">
+                The fastest and simplest way to download videos from any
+                platform. No ads, no hassle, just pure downloading power.
+              </p>
+              <div class="flex flex-col sm:flex-row gap-4">
+                <button
+                  class="px-6 py-3 bg-primary text-white font-medium !rounded-button whitespace-nowrap meteor-button flex items-center justify-center gap-2"
+                >
+                  <i class="ri-rocket-line"></i>
+                  Get Started
+                </button>
+                <button
+                  class="px-6 py-3 border border-gray-300 text-gray-700 font-medium !rounded-button whitespace-nowrap hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  <i class="ri-play-circle-line"></i>
+                  How It Works
+                </button>
+              </div>
+            </div>
+            <div class="md:w-1/2 flex justify-center">
+              <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+                <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">
+                  Download Now
+                </h2>
+                <div class="mb-6">
+                  <div class="relative">
+                    <input
+                      id="videoUrlInput"
+                      type="text"
+                      placeholder="Paste video URL here"
+                      class="input-url w-full px-4 py-3 !rounded-button pl-12 text-gray-700 focus:outline-none"
+                    />
+                    <div
+                      class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 flex items-center justify-center text-gray-400"
+                    >
+                      <i class="ri-link"></i>
+                    </div>
+                  </div>
+                </div>
+                <div id="videoInfoContainer"></div>
+                <button
+                  class="w-full py-3 bg-primary text-white font-medium !rounded-button whitespace-nowrap meteor-button flex items-center justify-center gap-2"
+                >
+                  <i class="ri-download-cloud-line"></i>
+                  Download
+                </button>
+                <div class="mt-4">
+                  <a href="#" class="text-primary hover:underline text-sm"
+                    >Register for faster downloads</a
+                  >
+                </div>
+                <div class="mt-2 text-xs text-gray-500 text-center">
+                  Sign up to get faster downloads!
+                </div>
+                <div class="mt-6 text-center text-sm text-gray-500">
+                  Supports YouTube, Vimeo, Facebook, Instagram, TikTok and more
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">How It Works</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+              Three simple steps to download any video you want
+            </p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div
+              class="bg-gray-50 p-8 rounded-xl text-center hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6"
+              >
+                <i class="ri-link-m text-primary text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-800">1. Copy URL</h3>
+              <p class="text-gray-600">
+                Copy the video URL from any supported platform
+              </p>
+            </div>
+            <div
+              class="bg-gray-50 p-8 rounded-xl text-center hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6"
+              >
+                <i class="ri-paste-line text-primary text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-800">2. Paste URL</h3>
+              <p class="text-gray-600">
+                Paste the URL into AyLoad's input field
+              </p>
+            </div>
+            <div
+              class="bg-gray-50 p-8 rounded-xl text-center hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6"
+              >
+                <i class="ri-download-cloud-line text-primary text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-800">3. Download</h3>
+              <p class="text-gray-600">
+                Choose your preferred quality and download
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Video Download Demo Section -->
+      <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">
+              Video Download Demo
+            </h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+              See how easy it is to download videos with AyLoad
+            </p>
+          </div>
+          <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-auto p-8">
+            <div class="relative mb-8">
+              <div
+                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
+              >
+                <div class="w-5 h-5 flex items-center justify-center text-gray-400">
+                  <i class="ri-link-m-line"></i>
+                </div>
+              </div>
+              <input
+                type="text"
+                class="w-full pl-10 pr-4 py-3 bg-gray-50 border-none rounded text-gray-800 select-none pointer-events-none"
+                placeholder="Enter video URL"
+                value="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                readonly
+              />
+            </div>
+            <div class="flex flex-col md:flex-row gap-6 mb-8">
+              <div class="md:w-2/5">
+                <div class="relative rounded-lg overflow-hidden mb-3">
+                  <img
+                    src="https://readdy.ai/api/search-image?query=computer%20monitor%20displaying%20video%20player%20interface%20with%20green%20screen%20background%2C%20modern%20desktop%20setup%2C%20high%20quality%20studio%20lighting%2C%20professional%20video%20editing%20workspace&width=400&height=250&seq=1&orientation=landscape"
+                    alt="Video thumbnail"
+                    class="w-full h-auto object-cover"
+                  />
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div
+                      class="w-12 h-12 flex items-center justify-center bg-black bg-opacity-60 rounded-full"
+                    >
+                      <i class="ri-play-fill text-white text-xl"></i>
+                    </div>
+                  </div>
+                  <div
+                    class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs px-2 py-1 flex justify-between"
+                  >
+                    <span>03:32</span>
+                    <span>5:02</span>
+                  </div>
+                </div>
+                <h3 class="font-medium text-gray-900 mb-1">
+                  Never Gonna Give You Up
+                </h3>
+                <p class="text-sm text-gray-600 mb-3">Rick Astley • 1.2M views</p>
+                <div class="mb-1">
+                  <div class="flex justify-between text-sm mb-1">
+                    <span class="text-gray-600">Download progress</span>
+                    <span class="text-gray-900 font-medium">68%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 68%"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="md:w-3/5">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  Select Format & Quality
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                  <div
+                    class="border border-gray-200 rounded p-3 cursor-pointer hover:border-primary transition-colors format-option"
+                  >
+                    <div class="flex justify-between mb-1">
+                      <span class="font-medium text-gray-900">MP4 • 1080p</span>
+                      <span class="text-gray-600 text-sm">128 MB</span>
+                    </div>
+                    <div class="flex items-center text-gray-600 text-sm">
+                      <i class="ri-hd-line mr-1"></i>
+                      <span>High Definition</span>
+                    </div>
+                  </div>
+                  <div
+                    class="border border-gray-200 rounded p-3 cursor-pointer hover:border-primary transition-colors format-option"
+                  >
+                    <div class="flex justify-between mb-1">
+                      <span class="font-medium text-gray-900">MP4 • 720p</span>
+                      <span class="text-gray-600 text-sm">84 MB</span>
+                    </div>
+                    <div class="flex items-center text-gray-600 text-sm">
+                      <i class="ri-hd-line mr-1"></i>
+                      <span>Standard HD</span>
+                    </div>
+                  </div>
+                  <div
+                    class="border border-gray-200 rounded p-3 cursor-pointer hover:border-primary transition-colors format-option"
+                  >
+                    <div class="flex justify-between mb-1">
+                      <span class="font-medium text-gray-900">MP4 • 480p</span>
+                      <span class="text-gray-600 text-sm">42 MB</span>
+                    </div>
+                    <div class="flex items-center text-gray-600 text-sm">
+                      <i class="ri-vidicon-line mr-1"></i>
+                      <span>Standard Definition</span>
+                    </div>
+                  </div>
+                  <div
+                    class="border border-gray-200 rounded p-3 cursor-pointer hover:border-primary transition-colors format-option"
+                  >
+                    <div class="flex justify-between mb-1">
+                      <span class="font-medium text-gray-900">MP3 • 320kbps</span>
+                      <span class="text-gray-600 text-sm">8 MB</span>
+                    </div>
+                    <div class="flex items-center text-gray-600 text-sm">
+                      <i class="ri-music-line mr-1"></i>
+                      <span>Audio Only</span>
+                    </div>
+                  </div>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  Additional Options
+                </h3>
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Extract Audio Only</span>
+                    <label class="custom-switch">
+                      <input type="checkbox" />
+                      <span class="switch-slider"></span>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Download Subtitles</span>
+                    <label class="custom-switch">
+                      <input type="checkbox" checked />
+                      <span class="switch-slider"></span>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Convert to MP3</span>
+                    <label class="custom-switch">
+                      <input type="checkbox" />
+                      <span class="switch-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <button
+                class="flex-1 bg-primary text-white py-3 px-6 rounded-button font-medium hover:bg-opacity-90 transition-colors flex items-center justify-center !rounded-button whitespace-nowrap meteor-button"
+              >
+                <i class="ri-download-line mr-2"></i>
+                Download Now
+              </button>
+              <button
+                class="w-12 h-12 flex items-center justify-center border border-gray-200 rounded-button hover:bg-gray-50 transition-colors !rounded-button whitespace-nowrap"
+              >
+                <i class="ri-share-line text-gray-600"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">
+              Supported Platforms
+            </h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+              Download videos from all major platforms with just a few clicks
+            </p>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6">
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm flex flex-col items-center hover:shadow-md transition-shadow"
+            >
+              <div class="w-12 h-12 flex items-center justify-center mb-3">
+                <i class="ri-youtube-fill text-3xl text-red-600"></i>
+              </div>
+              <span class="text-gray-700 font-medium">YouTube</span>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm flex flex-col items-center hover:shadow-md transition-shadow"
+            >
+              <div class="w-12 h-12 flex items-center justify-center mb-3">
+                <i class="ri-facebook-fill text-3xl text-blue-600"></i>
+              </div>
+              <span class="text-gray-700 font-medium">Facebook</span>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm flex flex-col items-center hover:shadow-md transition-shadow"
+            >
+              <div class="w-12 h-12 flex items-center justify-center mb-3">
+                <i class="ri-instagram-fill text-3xl text-pink-600"></i>
+              </div>
+              <span class="text-gray-700 font-medium">Instagram</span>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm flex flex-col items-center hover:shadow-md transition-shadow"
+            >
+              <div class="w-12 h-12 flex items-center justify-center mb-3">
+                <i class="ri-tiktok-fill text-3xl text-black"></i>
+              </div>
+              <span class="text-gray-700 font-medium">TikTok</span>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm flex flex-col items-center hover:shadow-md transition-shadow"
+            >
+              <div class="w-12 h-12 flex items-center justify-center mb-3">
+                <i class="ri-vimeo-fill text-3xl text-blue-500"></i>
+              </div>
+              <span class="text-gray-700 font-medium">Vimeo</span>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm flex flex-col items-center hover:shadow-md transition-shadow"
+            >
+              <div class="w-12 h-12 flex items-center justify-center mb-3">
+                <i class="ri-twitter-fill text-3xl text-blue-400"></i>
+              </div>
+              <span class="text-gray-700 font-medium">Twitter</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold mb-4 text-gray-800">Key Features</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+              Why choose AyLoad for all your video downloading needs
+            </p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4"
+              >
+                <i class="ri-speed-line text-primary text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-800">
+                Lightning Fast
+              </h3>
+              <p class="text-gray-600">
+                Download videos at maximum speed with our optimized servers
+              </p>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4"
+              >
+                <i class="ri-shield-check-line text-primary text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-800">
+                Secure & Private
+              </h3>
+              <p class="text-gray-600">
+                Your data and downloads are completely private and secure
+              </p>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4"
+              >
+                <i class="ri-layout-grid-line text-primary text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-800">
+                Multiple Formats
+              </h3>
+              <p class="text-gray-600">
+                Download in MP4, MP3, WEBM and many other formats
+              </p>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4"
+              >
+                <i class="ri-hd-line text-primary text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-800">HD Quality</h3>
+              <p class="text-gray-600">
+                Download videos in the highest quality available, up to 4K
+              </p>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4"
+              >
+                <i class="ri-global-line text-primary text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-800">
+                Wide Compatibility
+              </h3>
+              <p class="text-gray-600">
+                Works with all major video platforms and websites
+              </p>
+            </div>
+            <div
+              class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4"
+              >
+                <i class="ri-advertisement-line text-primary text-xl"></i>
+              </div>
+              <h3 class="text-xl font-bold mb-3 text-gray-800">
+                Ad-Free Experience
+              </h3>
+              <p class="text-gray-600">
+                No annoying ads or popups during the download process
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="py-16 bg-primary/5">
+        <div class="container mx-auto px-4">
+          <div class="max-w-3xl mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">
+              Ready to Start Downloading?
+            </h2>
+            <p class="text-gray-600 mb-8">
+              Join thousands of users who trust AyLoad for their video
+              downloading needs. No registration required, start downloading
+              right away!
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                class="px-8 py-3 bg-primary text-white font-medium !rounded-button whitespace-nowrap meteor-button flex items-center justify-center gap-2"
+              >
+                <i class="ri-download-cloud-line"></i>
+                Start Downloading
+              </button>
+              <button
+                class="px-8 py-3 border border-gray-300 text-gray-700 font-medium !rounded-button whitespace-nowrap hover:bg-white transition-colors flex items-center justify-center gap-2"
+              >
+                <i class="ri-information-line"></i>
+                Learn More
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="bg-gray-800 text-white pt-12 pb-6">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <a
+              href="#"
+              class="text-2xl text-white flex items-center gap-2 mb-4"
+            >
+              <img
+                src="https://static.readdy.ai/image/8d12cae1457c5baac07b525f3594878b/3551795765c042754d02cb9240158717.png"
+                alt="Logo"
+                class="w-10 h-10 object-contain"
+              />
+              AyLoad
+            </a>
+            <p class="text-gray-400 mb-4">
+              The fastest and simplest way to download videos from any platform.
+            </p>
+            <div class="flex space-x-4">
+              <a
+                href="#"
+                class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <i class="ri-twitter-fill"></i>
+              </a>
+              <a
+                href="#"
+                class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <i class="ri-facebook-fill"></i>
+              </a>
+              <a
+                href="#"
+                class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <i class="ri-instagram-fill"></i>
+              </a>
+              <a
+                href="#"
+                class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <i class="ri-youtube-fill"></i>
+              </a>
+            </div>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold mb-4">Quick Links</h4>
+            <ul class="space-y-2">
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Home</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Features</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >How It Works</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >FAQ</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Contact Us</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold mb-4">Support</h4>
+            <ul class="space-y-2">
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Help Center</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Community</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Terms of Service</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Privacy Policy</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="text-gray-400 hover:text-white transition-colors"
+                  >Cookie Policy</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold mb-4">Contact</h4>
+            <p class="text-gray-400 mb-4">
+              Get in touch with us for any questions or support.
+            </p>
+            <a
+              href="mailto:gokayaktas10@gmail.com"
+              class="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
+            >
+              <i class="ri-mail-line"></i>
+              gokayaktas10@gmail.com
+            </a>
+          </div>
+        </div>
+        <div
+          class="border-t border-gray-700 pt-6 flex flex-col md:flex-row justify-between items-center"
+        >
+          <p class="text-gray-400 text-sm mb-4 md:mb-0">
+            © 2025 AyLoad. All rights reserved.
+          </p>
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center">
+              <i class="ri-visa-fill text-2xl mr-2"></i>
+              <i class="ri-mastercard-fill text-2xl mr-2"></i>
+              <i class="ri-paypal-fill text-2xl mr-2"></i>
+              <i class="ri-apple-fill text-2xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <div id="toast" class="toast">
+      <div class="flex items-center">
+        <div class="w-6 h-6 flex items-center justify-center mr-3 text-primary">
+          <i class="ri-check-line"></i>
+        </div>
+        <p class="text-gray-700">Download started successfully!</p>
+      </div>
+    </div>
+    <script id="videoUrlScript">
+    // When a video URL is pasted, fetch video info and show format/quality options
+    (function() {
+      const urlInput = document.getElementById('videoUrlInput');
+      const infoContainer = document.getElementById('videoInfoContainer');
+      let lastUrl = '';
+
+      // Helper: create format option button
+      function createFormatButton(format, selected) {
+        return `<button class="border ${selected ? 'border-primary' : 'border-gray-200'} rounded p-3 cursor-pointer hover:border-primary transition-colors format-option w-full flex items-center justify-between mb-2" data-format="${format.format}" data-quality="${format.quality}">
+          <div>
+            <div class="font-medium">${format.format} • ${format.quality}</div>
+            <div class="text-sm text-gray-500">${format.type === 'audio' ? 'Audio Only' : (format.quality.includes('p') ? (format.quality === '1080p' ? 'High Definition' : (format.quality === '720p' ? 'Standard HD' : 'Standard Definition')) : '')}</div>
+          </div>
+          <div class="text-sm text-gray-500">${format.size || ''}</div>
+        </button>`;
+      }
+
+      // Helper: render video info UI
+      function renderVideoInfo(info) {
+        let formatButtons = '';
+        (info.formats || []).forEach((f, i) => {
+          formatButtons += createFormatButton(f, i === 0);
+        });
+        infoContainer.innerHTML = `
+          <div class="flex flex-col md:flex-row gap-6 mb-4">
+            <div class="md:w-2/5">
+              <div class="relative rounded-lg overflow-hidden mb-3 aspect-video bg-gray-100">
+                <img src="${info.thumbnail}" alt="Video thumbnail" class="w-full h-full object-cover" />
+                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs px-2 py-1 flex justify-between">
+                  <span>${info.duration}</span>
+                </div>
+              </div>
+              <h3 class="font-medium text-gray-900 mb-1">${info.title}</h3>
+            </div>
+            <div class="md:w-3/5">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Select Format & Quality</h3>
+              <div id="formatOptions" class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">${formatButtons}</div>
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Additional Options</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-700">Extract Audio Only</span>
+                  <label class="custom-switch">
+                    <input type="checkbox" id="extractAudioOpt" />
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-700">Download Subtitles</span>
+                  <label class="custom-switch">
+                    <input type="checkbox" id="downloadSubsOpt" />
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-700">Convert to MP3</span>
+                  <label class="custom-switch">
+                    <input type="checkbox" id="convertMp3Opt" />
+                    <span class="switch-slider"></span>
+                  </label>
+                </div>
+              </div>
+              <button id="startDownloadBtn" class="w-full mt-6 py-3 bg-primary text-white font-medium !rounded-button meteor-button flex items-center justify-center gap-2">
+                <i class="ri-download-line mr-2"></i> Download Now
+              </button>
+            </div>
+          </div>
+          <div id="downloadProgress" class="mt-4 hidden">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Download progress</span>
+              <span id="progressText" class="text-gray-900 font-medium">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+          </div>
+        `;
+        // Add event listeners for format selection
+        document.querySelectorAll('#formatOptions .format-option').forEach(btn => {
+          btn.addEventListener('click', function() {
+            document.querySelectorAll('#formatOptions .format-option').forEach(opt => opt.classList.remove('border-primary'));
+            this.classList.add('border-primary');
+          });
+        });
+        // Download button event
+        document.getElementById('startDownloadBtn').addEventListener('click', function() {
+          startDownload(info);
+        });
+      }
+
+      // Download start logic (demo, real API call can be added)
+      function startDownload(info) {
+        const selectedBtn = document.querySelector('#formatOptions .border-primary');
+        if (!selectedBtn) return alert('Please select a format!');
+        const format = selectedBtn.getAttribute('data-format');
+        const quality = selectedBtn.getAttribute('data-quality');
+        const extractAudio = document.getElementById('extractAudioOpt').checked;
+        const downloadSubs = document.getElementById('downloadSubsOpt').checked;
+        const convertMp3 = document.getElementById('convertMp3Opt').checked;
+        // Show progress bar
+        const progressBar = document.querySelector('#downloadProgress .progress-fill');
+        const progressText = document.getElementById('progressText');
+        document.getElementById('downloadProgress').classList.remove('hidden');
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 10;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            setTimeout(() => {
+              alert('Download completed!');
+            }, 500);
+          }
+          progressBar.style.width = progress + '%';
+          progressText.textContent = Math.round(progress) + '%';
+        }, 200);
+        // Real download API call can be placed here
+        // fetch('/api/download', { method: 'POST', ... })
+      }
+
+      // Fetch video info from backend
+      async function fetchVideoInfo(url) {
+        infoContainer.innerHTML = '<div class="text-center text-gray-500 py-8">Loading video info...</div>';
+        try {
+          const res = await fetch(`/api/video-info?url=${encodeURIComponent(url)}`);
+          if (!res.ok) throw new Error('Failed to fetch video info');
+          const info = await res.json();
+          renderVideoInfo(info);
+        } catch (err) {
+          infoContainer.innerHTML = `<div class="text-center text-red-500 py-8">${err.message}</div>`;
+        }
+      }
+
+      // Listen for input change (paste or enter)
+      urlInput.addEventListener('change', function() {
+        const url = urlInput.value.trim();
+        if (url && url !== lastUrl) {
+          lastUrl = url;
+          fetchVideoInfo(url);
+        }
+      });
+      urlInput.addEventListener('paste', function(e) {
+        setTimeout(() => {
+          const url = urlInput.value.trim();
+          if (url && url !== lastUrl) {
+            lastUrl = url;
+            fetchVideoInfo(url);
+          }
+        }, 100);
+      });
+    })();
+    </script>
+    <script id="mobileMenu">
+      document.addEventListener("DOMContentLoaded", function () {
+        const menuButton = document.querySelector(".ri-menu-line").parentNode;
+        const nav = document.querySelector("nav");
+        menuButton.addEventListener("click", function () {
+          nav.classList.toggle("hidden");
+          nav.classList.toggle("flex");
+          nav.classList.toggle("flex-col");
+          nav.classList.toggle("absolute");
+          nav.classList.toggle("top-16");
+          nav.classList.toggle("right-4");
+          nav.classList.toggle("bg-white");
+          nav.classList.toggle("shadow-lg");
+          nav.classList.toggle("p-4");
+          nav.classList.toggle("rounded-lg");
+          nav.classList.toggle("z-20");
+        });
+      });
+    </script>
+    <!-- Login/Register Modal Başlangıç -->
+    <div id="authModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-xl p-6 w-full max-w-md relative">
+        <button id="closeAuthModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700">
+          <i class="ri-close-line text-2xl"></i>
+        </button>
+        <h3 id="authTitle" class="text-2xl font-bold text-center mb-6">Log in</h3>
+        <form id="authForm" class="space-y-4">
+          <div>
+            <label class="block text-gray-700 mb-1">Email</label>
+            <input type="email" id="authEmail" class="input-url w-full px-4 py-3 !rounded-button" required />
+          </div>
+          <div>
+            <label class="block text-gray-700 mb-1">Password</label>
+            <input type="password" id="authPassword" class="input-url w-full px-4 py-3 !rounded-button" required minlength="6" />
+            <div id="passwordStrength" class="text-xs mt-1"></div>
+          </div>
+          <div id="registerFields" class="hidden">
+            <label class="block text-gray-700 mb-1">Repeat Password</label>
+            <input type="password" id="authPasswordRepeat" class="input-url w-full px-4 py-3 !rounded-button" required minlength="6" />
+          </div>
+          <button type="submit" class="w-full py-3 bg-primary text-white font-medium !rounded-button meteor-button">Continue</button>
+          <div class="text-center text-sm mt-2">
+            <span id="toggleAuthMode" class="text-primary hover:underline cursor-pointer">Don't have an account? Register</span>
+          </div>
+          <div class="flex items-center my-4">
+            <div class="flex-grow h-px bg-gray-200"></div>
+            <span class="mx-2 text-gray-400 text-xs">or</span>
+            <div class="flex-grow h-px bg-gray-200"></div>
+          </div>
+          <button type="button" id="googleAuthBtn" class="w-full py-2 border border-gray-300 flex items-center justify-center gap-2 rounded-button hover:bg-gray-50">
+            <i class="ri-google-fill text-lg"></i> Continue with Google
+          </button>
+        </form>
+      </div>
+    </div>
+    <!-- Login/Register Modal End -->
+
+    <!-- Modal and script sonu -->
+    <script id="authModalScript">
+    // Modal and form logic with English comments
+    (function() {
+      const authModal = document.getElementById('authModal');
+      const closeAuthModal = document.getElementById('closeAuthModal');
+      const signInBtn = Array.from(document.querySelectorAll('button')).find(btn => btn.textContent.trim() === 'Log in');
+      const signUpBtn = Array.from(document.querySelectorAll('button')).find(btn => btn.textContent.trim() === 'Register');
+      const authTitle = document.getElementById('authTitle');
+      const authForm = document.getElementById('authForm');
+      const toggleAuthMode = document.getElementById('toggleAuthMode');
+      const registerFields = document.getElementById('registerFields');
+      const passwordInput = document.getElementById('authPassword');
+      const passwordRepeatInput = document.getElementById('authPasswordRepeat');
+      const passwordStrength = document.getElementById('passwordStrength');
+      let isRegister = false;
+
+      // Open modal function
+      function openModal(register = false) {
+        isRegister = register;
+        authModal.classList.remove('hidden');
+        authTitle.textContent = register ? 'Register' : 'Log in';
+        toggleAuthMode.textContent = register ? 'Already have an account? Log in' : "Don't have an account? Register";
+        registerFields.classList.toggle('hidden', !register);
+        authForm.reset();
+        passwordStrength.textContent = '';
+      }
+      // Close modal function
+      function closeModal() {
+        authModal.classList.add('hidden');
+      }
+      // Password strength checker
+      function checkPasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 6) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        switch(strength) {
+          case 0:
+          case 1:
+            return 'Very Weak';
+          case 2:
+            return 'Weak';
+          case 3:
+            return 'Medium';
+          case 4:
+            return 'Strong';
+        }
+      }
+      // Show password strength as user types
+      passwordInput.addEventListener('input', function() {
+        passwordStrength.textContent = 'Password Strength: ' + checkPasswordStrength(this.value);
+      });
+      // Modal open buttons
+      document.querySelectorAll('button').forEach(btn => {
+        if (btn.textContent.trim() === 'Log in') btn.addEventListener('click', () => openModal(false));
+        if (btn.textContent.trim() === 'Register') btn.addEventListener('click', () => openModal(true));
+      });
+      // Close modal button
+      closeAuthModal.addEventListener('click', closeModal);
+      // Auth mode toggle
+      toggleAuthMode.addEventListener('click', function() {
+        openModal(!isRegister);
+      });
+      // Form submit logic
+      authForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = document.getElementById('authEmail').value.trim();
+        const password = passwordInput.value;
+        if (!email || !password) {
+          alert('Please fill in all fields.');
+          return;
+        }
+        if (isRegister) {
+          const repeat = passwordRepeatInput.value;
+          if (password !== repeat) {
+            alert('Passwords do not match!');
+            return;
+          }
+          if (checkPasswordStrength(password) !== 'Strong') {
+            alert('Please choose a stronger password.');
+            return;
+          }
+          // Supabase register logic goes here
+          alert('Registration successful! (Demo)');
+          closeModal();
+        } else {
+          // Supabase login logic goes here
+          alert('Login successful! (Demo)');
+          closeModal();
+        }
+      });
+    })();
+    </script>
+    <!-- Modal and script sonu -->
+  </body>
+</html>
